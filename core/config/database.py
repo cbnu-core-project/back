@@ -14,6 +14,7 @@ client = pymongo.MongoClient(
 
 db = client['core_data']
 
+# 각 collection을 변수로 선언하고 불러올 수 있도록 함
 collection_club = db['club']
 collection_promotion = db['promotion']
 collection_notice = db['notice']

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-
+# 각종 데이터 모델들을 정의하는 파일
 class Club(BaseModel):
 	title: str
 	content: str

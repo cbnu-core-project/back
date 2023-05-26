@@ -11,8 +11,20 @@ router = APIRouter(
 	tags=["users"]
 )
 
+# JWT 관련내용은 공식문서 (https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/) 참고
+# JWT에 대한 내용은 https://jwt.io/ 에서 확인 가능
+# JWT란? 간단히 말해 토큰을 사용하여 정보를 안전하게 전달하는 방법 중 하나
+# JWT 토큰은 3가지로 구성되어 있음
+# 1. Header : 토큰의 타입과 해시 암호화 알고리즘으로 구성
+# 2. Payload : 토큰에 담을 정보가 들어있는 부분
+# 3. Signature : 일련의 문자열로, 토큰을 인코딩하고, 헤더의 인코딩 값, 페이로드의 인코딩 값을 합친 후, 비밀키로 해싱하여 생성
+# JWT 토큰은 위의 3가지를 합친 문자열로 구성되어 있음
+
+# JWT 토큰 만료 시간
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
+# JWT 토큰 암호화 키
 SECRET_KEY = "secretkey825"
+# JWT 토큰 암호화 알고리즘
 ALGORITHM = "HS256"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
