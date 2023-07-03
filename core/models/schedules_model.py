@@ -10,7 +10,7 @@ class Schedule(BaseModel):
 	content: str
 	place: str
 	# datetime: datetime.datetime
-	year: str # 녕
+	year: str # 년
 	month: str # 월
 	date: str # 일
 	day: str # 요일
