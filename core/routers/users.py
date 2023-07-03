@@ -1,30 +1,18 @@
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from datetime import timedelta, datetime
 from fastapi import APIRouter, Depends, HTTPException
 from config.database import collection_user
 from schemas.users_schema import users_serializer
 from models.users_model import User
-from jose import jwt
+from jose import jwt, JWTError
 
 router = APIRouter(
 	tags=["users"]
 )
 
-# JWT 관련내용은 공식문서 (https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/) 참고
-# JWT에 대한 내용은 https://jwt.io/ 에서 확인 가능
-# JWT란? 간단히 말해 토큰을 사용하여 정보를 안전하게 전달하는 방법 중 하나
-# JWT 토큰은 3가지로 구성되어 있음
-# 1. Header : 토큰의 타입과 해시 암호화 알고리즘으로 구성
-# 2. Payload : 토큰에 담을 정보가 들어있는 부분
-# 3. Signature : 일련의 문자열로, 토큰을 인코딩하고, 헤더의 인코딩 값, 페이로드의 인코딩 값을 합친 후, 비밀키로 해싱하여 생성
-# JWT 토큰은 위의 3가지를 합친 문자열로 구성되어 있음
-
-# JWT 토큰 만료 시간
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
-# JWT 토큰 암호화 키
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
 SECRET_KEY = "secretkey825"
-# JWT 토큰 암호화 알고리즘
 ALGORITHM = "HS256"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -57,13 +45,45 @@ def login_for_acess_token(form_data: OAuth2PasswordRequestForm = Depends()):
 	# access token 만들기
 	data = {
 		"sub": user["username"],
-		"exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+		"exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
 	}
 	access_token = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
 
 	return {
         "access_token": access_token,
         "token_type": "bearer",
-        "username": user["username"]
+        "username": user["username"],
+		"clubs": user["clubs"]
     }
 
+
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/login")
+# 토큰 검증 함수
+def verify_token(token: str = Depends(oauth2_schema)):
+	try:
+		payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+		sub = payload.get("sub")
+
+		if sub is None:
+			raise HTTPException(status_code=401, detail="로그인 되어있지 않다.")
+
+		if sub:
+			user = users_serializer(collection_user.find({"username": sub}))
+			if user is None:
+				raise HTTPException(status_code=401, detail="유효하지 않은 토큰이다.1")
+
+		exp = payload.get("exp")
+		if exp is None or datetime.utcnow() > datetime.fromtimestamp(exp):
+			raise HTTPException(status_code=401, detail="토큰이 이미 만기되었다.")
+
+		return { "payload": payload, "user": user }
+	except JWTError:
+		raise HTTPException(status_code=401, detail="유효하지 않은 토큰이다.2")
+
+# 보호된 엔드포인트
+@router.get("/protected")
+async def protected_route(token: str = Depends(oauth2_schema)):
+	payload = verify_token(token).get("payload")
+	# 토큰이 유효하다면, 여기에서 필요한 처리를 수행합니다.
+	print('토큰 유효한듯?')
+	return token

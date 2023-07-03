@@ -41,7 +41,7 @@ async def read_some_club(skip: int, limit: int):
 
 @router.get("/api/clubs/some/classification/", description="동아리 skip, limit를 통한 글 일부 가져오기\n그리고 classification을 통한 중앙 동아리 직무 동아리 구분 가능")
 async def read_some_club(skip: int, limit: int, classification: int):
-	clubs = clubs_serializer(collection_club.find({"classification": classification}))
+	clubs = clubs_serializer(collection_club.find({"classification": classification}).skip(skip).limit(limit))
 
 	return clubs
 

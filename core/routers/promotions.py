@@ -38,7 +38,7 @@ async def read_some_promotion(skip: int, limit: int):
 
 @router.get("/api/promotions/some/classification/", description="홍보글 skip, limit를 통한 글 일부 가져오기\n그리고 classification을 통한 중앙 동아리 직무 동아리 구분 가능")
 async def read_some_promotion(skip: int, limit: int, classification: int):
-	promotions = promotions_serializer(collection_promotion.find({"classification": classification}))
+	promotions = promotions_serializer(collection_promotion.find({"classification": classification}).skip(skip).limit(limit))
 
 	return promotions
 

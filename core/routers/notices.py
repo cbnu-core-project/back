@@ -10,7 +10,6 @@ router = APIRouter(
 
 @router.get("/api/notices", description="공지사항 전체 가져오기")
 async def read_all_notice():
-	# serializer의 역할 -> mongodb의 objectid를 str로 변환
 	notices = notices_serializer(collection_notice.find())
 
 	return notices

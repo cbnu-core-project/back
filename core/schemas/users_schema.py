@@ -3,7 +3,8 @@ def user_serializer(user) -> dict:
         "_id": user["_id"],
         "username": user["username"],
         "password": user["password"],
-        "nickname": user["nickname"]
+        "realname": user["realname"],
+        "clubs": user["clubs"],
     }
 
 def users_serializer(users) -> list:

@@ -1,7 +1,7 @@
-import certifi
 import pydantic
 import pymongo
 from bson import ObjectId
+import certifi
 
 ################################################################
 pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
@@ -10,13 +10,15 @@ pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
 ca = certifi.where()
 
 client = pymongo.MongoClient(
-	"mongodb+srv://apple825:aa04190825@cluster0.amq3ff3.mongodb.net/?retryWrites=true&w=majority", tlsCAFile=ca)
+	"mongodb+srv://apple825:aa04190825@cluster0.amq3ff3.mongodb.net/?retryWrites=true&w=majority",
+	tlsCAFile=ca
+)
 
 db = client['core_data']
 
-# 각 collection을 변수로 선언하고 불러올 수 있도록 함
 collection_club = db['club']
 collection_promotion = db['promotion']
 collection_notice = db['notice']
 collection_user = db['user']
+collection_schedule = db['schedule']
 ################################################################
