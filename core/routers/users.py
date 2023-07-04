@@ -1,3 +1,4 @@
+from bson import ObjectId
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from datetime import timedelta, datetime
@@ -6,6 +7,7 @@ from config.database import collection_user
 from schemas.users_schema import users_serializer
 from models.users_model import User
 from jose import jwt, JWTError
+from pydantic import BaseModel
 
 router = APIRouter(
 	tags=["users"]
@@ -77,7 +79,7 @@ def verify_token(token: str = Depends(oauth2_schema)):
 		if exp is None or datetime.utcnow() > datetime.fromtimestamp(exp):
 			raise HTTPException(status_code=401, detail="토큰이 이미 만기되었다.")
 
-		return { "payload": payload, "user": user }
+		return { "payload": payload, "user": user[0] } # dict형태로 반환
 	except JWTError:
 		raise HTTPException(status_code=401, detail="유효하지 않은 토큰이다.2")
 
@@ -90,11 +92,20 @@ async def protected_route(token: str = Depends(oauth2_schema)):
 	return token
 
 
-# 유저에 동아리 추가하기
-@router.put("/api/user/clubs/{club_objid}")
-def put_user_clubs(club_objid: str, token: str = Depends(oauth2_schema)):
+# 현재 유저가 속한 동아리 리스트 가져오기
+@router.get("/api/user/clubs")
+def get_user_clubs(token: str = Depends(oauth2_schema)):
 	user = verify_token(token).get("user")
-	# collection_user.update_one({"_id": ObjectId(user["_id"])}, {"$set": })
+	clubs = user.get("clubs")
+	return clubs
+class UserClubs(BaseModel):
+	clubs: list[str]
+
+# 유저에 동아리 추가하기
+@router.put("/api/user/clubs")
+def update_user_clubs(clubs: UserClubs, token: str = Depends(oauth2_schema)):
+	user = verify_token(token).get("user")
+	collection_user.update_one({"_id": ObjectId(user["_id"])}, {"$set": {"clubs": list(clubs)}})
 	return "update"
 
 

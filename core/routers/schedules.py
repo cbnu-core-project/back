@@ -15,7 +15,7 @@ oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/login")
 def get_user_schedule(token: str = Depends(oauth2_schema)):
     user = verify_token(token).get("user")
     # 토큰이 유효하면, 밑에 실행
-    clubs = user[0].get('clubs')
+    clubs = user.get('clubs')
 
     # 검색 조건 설정
     query = {"$or": [{"club_objid": club} for club in clubs]}
