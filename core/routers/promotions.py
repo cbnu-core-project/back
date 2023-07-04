@@ -42,6 +42,47 @@ async def read_some_promotion(skip: int, limit: int, classification: int):
 
 	return promotions
 
+@router.get("/api/promotions/search/", description="검색어 쿼리로 넘기기")
+async def search_promotion(query: str):
+	condition = [
+  {
+    '$search': {
+      'index': "promotionSearch",
+      'text': {
+        'query': query,
+        'path': ['title', 'content']
+      }
+    }
+  },
+		{ '$addFields': { 'score' : { '$meta': 'searchScore'}}}
+]
+
+	promotions = promotions_serializer(collection_promotion.aggregate(condition))
+
+	return promotions
+
+
+@router.get("/api/promotions/search/classification/", description="검색어 및 분류 쿼리로 넘기기")
+async def search_promotion(query: str, classification: int):
+	condition = [
+  	{
+    '$search': {
+      'index': "promotionSearch",
+      'text': {
+        'query': query,
+        'path': ['title', 'content']
+      		}
+    	}
+  	},
+	{'$match': {'classification': classification}},
+	{ '$addFields': { 'score' : { '$meta': 'searchScore'}}}
+]
+
+	promotions = promotions_serializer(collection_promotion.aggregate(condition))
+
+	return promotions
+
+
 
 @router.post("/api/promotion", description="홍보글 추가하기 / classification = 1 -> 중앙동아리, 2 -> 직무동아리")
 async def create_promotion(promotion: Promotion):
