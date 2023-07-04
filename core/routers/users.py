@@ -24,7 +24,8 @@ def user_register(user: User):
 							detail="이미 존재하는 사용자입니다.")
 	collection_user.insert_one({"username": user.username,
 								"password": pwd_context.hash(user.password),
-								"nickname": user.nickname})
+								"realname": user.realname,
+								"clubs": user.clubs})
 	return "회원가입 성공!"
 
 
@@ -87,3 +88,13 @@ async def protected_route(token: str = Depends(oauth2_schema)):
 	# 토큰이 유효하다면, 여기에서 필요한 처리를 수행합니다.
 	print('토큰 유효한듯?')
 	return token
+
+
+# 유저에 동아리 추가하기
+@router.put("/api/user/clubs/{club_objid}")
+def put_user_clubs(club_objid: str, token: str = Depends(oauth2_schema)):
+	user = verify_token(token).get("user")
+	# collection_user.update_one({"_id": ObjectId(user["_id"])}, {"$set": })
+	return "update"
+
+
