@@ -1,23 +1,20 @@
 from bson import ObjectId
-from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from datetime import timedelta, datetime
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Depends, HTTPException
 from config.database import collection_user
 from schemas.users_schema import users_serializer
 from models.users_model import User
-from jose import jwt, JWTError
 from pydantic import BaseModel
+
+# utils
+from utils.pwd_context import pwd_context
+from utils.token import create_token, verify_token, oauth2_schema
 
 router = APIRouter(
 	tags=["users"]
 )
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 15
-SECRET_KEY = "secretkey825"
-ALGORITHM = "HS256"
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @router.post("/api/register")
 def user_register(user: User):
@@ -45,12 +42,8 @@ def login_for_acess_token(form_data: OAuth2PasswordRequestForm = Depends()):
 			headers={"WWW-Authenticate": "Bearer"},
 		)
 
-	# access token 만들기
-	data = {
-		"sub": user["username"],
-		"exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
-	}
-	access_token = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+	# access_token 만들기
+	access_token = create_token(user)
 
 	return {
         "access_token": access_token,
@@ -60,52 +53,42 @@ def login_for_acess_token(form_data: OAuth2PasswordRequestForm = Depends()):
     }
 
 
-oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/login")
-# 토큰 검증 함수
-def verify_token(token: str = Depends(oauth2_schema)):
-	try:
-		payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-		sub = payload.get("sub")
-
-		if sub is None:
-			raise HTTPException(status_code=401, detail="로그인 되어있지 않다.")
-
-		if sub:
-			user = users_serializer(collection_user.find({"username": sub}))
-			if user is None:
-				raise HTTPException(status_code=401, detail="유효하지 않은 토큰이다.1")
-
-		exp = payload.get("exp")
-		if exp is None or datetime.utcnow() > datetime.fromtimestamp(exp):
-			raise HTTPException(status_code=401, detail="토큰이 이미 만기되었다.")
-
-		return { "payload": payload, "user": user[0] } # dict형태로 반환
-	except JWTError:
-		raise HTTPException(status_code=401, detail="유효하지 않은 토큰이다.2")
-
 # 보호된 엔드포인트
 @router.get("/protected")
 async def protected_route(token: str = Depends(oauth2_schema)):
-	payload = verify_token(token).get("payload")
+	payload = verify_token(token)
 	# 토큰이 유효하다면, 여기에서 필요한 처리를 수행합니다.
 	print('토큰 유효한듯?')
 	return token
 
+@router.get("/api/user/info/{username}", description="username(id) 에 맞는 유저의 정보 리턴")
+def get_user(username: str):
+	user = users_serializer(collection_user.find({"username": username}))[0]
+	return user
 
 # 현재 유저가 속한 동아리 리스트 가져오기
 @router.get("/api/user/clubs")
 def get_user_clubs(token: str = Depends(oauth2_schema)):
-	user = verify_token(token).get("user")
+	user = verify_token(token)
 	clubs = user.get("clubs")
+
 	return clubs
+
 class UserClubs(BaseModel):
 	clubs: list[str]
 
-# 유저에 동아리 추가하기
-@router.put("/api/user/clubs")
+# 유저 동아리 리스트 수정하기
+@router.put("/api/user/clubs", description="유저 동아리 리스트 수정하기 (보낸 리스트로 전부 대체)")
 def update_user_clubs(clubs: UserClubs, token: str = Depends(oauth2_schema)):
-	user = verify_token(token).get("user")
-	collection_user.update_one({"_id": ObjectId(user["_id"])}, {"$set": {"clubs": list(clubs)}})
+	user = verify_token(token)
+	clubs_list = dict(clubs).get("clubs")
+	collection_user.update_one({"_id": ObjectId(user["_id"])}, {"$set": {"clubs": clubs_list}})
 	return "update"
 
+# 유저 동아리 리스트에 동아리 1개 추가하기
+@router.post("/api/user/club/push/{objid}", description="유저 동아리 리스트에 동아리 1개 추가")
+def push_user_club(objid: str, token: str = Depends(oauth2_schema)):
+	user = verify_token(token)
+	collection_user.update_one({"_id": ObjectId(user["_id"])}, {"$push": {"clubs": objid}})
 
+	return "push"

@@ -1,20 +1,18 @@
+from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
-from .users import verify_token
 from schemas.schedules_schema import schedules_serializer
 from config.database import collection_schedule
 from models.schedules_model import Schedule
+from utils.token import oauth2_schema, verify_token, verify_authority
 
 router = APIRouter(
     tags=["schedules"]
 )
 
-oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/login")
-
 @router.get('/api/user/schedule')
 def get_user_schedule(token: str = Depends(oauth2_schema)):
-    user = verify_token(token).get("user")
-    # 토큰이 유효하면, 밑에 실행
+    user = verify_token(token)
+    # 토큰과 권한이 유효하면 밑에 실행
     clubs = user.get('clubs')
 
     # 검색 조건 설정
@@ -27,5 +25,23 @@ def get_user_schedule(token: str = Depends(oauth2_schema)):
 
 @router.post('/api/user/schedule')
 def post_user_schedule(schedule: Schedule, token: str = Depends(oauth2_schema)):
+    schedule = dict(schedule)
+    user = verify_authority(club_objid=schedule.get("club_objid"), token=token)
     collection_schedule.insert_one(dict(schedule))
     return "success"
+
+@router.delete('/api/user/schedule/{objid}')
+def delete_user_schedule(schedule_objid: str, token: str = Depends((oauth2_schema))):
+    try:
+        schedule = schedules_serializer(collection_schedule.find({"_id": ObjectId(schedule_objid)}))
+        club_objid = schedule[0].get("club_objid")
+    except:
+        raise HTTPException(status_code=401, detail="유효하지 않은 objid")
+
+    # 권한 및 토큰 검증
+    user = verify_authority(club_objid=club_objid, token=token)
+    collection_schedule.delete_one({"_id": ObjectId(schedule_objid)})
+    return "delete success"
+
+
+
