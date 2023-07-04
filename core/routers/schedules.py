@@ -28,5 +28,4 @@ def get_user_schedule(token: str = Depends(oauth2_schema)):
 @router.post('/api/user/schedule')
 def post_user_schedule(schedule: Schedule, token: str = Depends(oauth2_schema)):
     collection_schedule.insert_one(dict(schedule))
-
     return "success"
