@@ -77,7 +77,7 @@ def get_user_clubs(token: str = Depends(oauth2_schema)):
 class UserClubs(BaseModel):
 	clubs: list[str]
 
-# 유저 동아리 리스트 수정하기
+# 유저 동아리 리스트 수정하기 ( 받아온 리스트로 대체 )
 @router.put("/api/user/clubs", description="유저 동아리 리스트 수정하기 (보낸 리스트로 전부 대체)")
 def update_user_clubs(clubs: UserClubs, token: str = Depends(oauth2_schema)):
 	user = verify_token(token)
@@ -92,3 +92,4 @@ def push_user_club(objid: str, token: str = Depends(oauth2_schema)):
 	collection_user.update_one({"_id": ObjectId(user["_id"])}, {"$push": {"clubs": objid}})
 
 	return "push"
+

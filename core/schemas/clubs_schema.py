@@ -5,7 +5,7 @@ def club_serializer(club) -> dict:
 		"content": club["content"],
 		"author": club["author"],
 		"user_id": club["user_id"],
-		"image_url": club["image_url"],
+		"image_urls": club["image_urls"],
 		"tag1": club["tag1"],
 		"tag2": club["tag2"],
 		"tag3": club["tag3"],

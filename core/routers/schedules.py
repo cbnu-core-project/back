@@ -24,11 +24,18 @@ def get_user_schedule(token: str = Depends(oauth2_schema)):
     return results
 
 @router.post('/api/user/schedule')
-def post_user_schedule(schedule: Schedule, token: str = Depends(oauth2_schema)):
+def create_user_schedule(schedule: Schedule, token: str = Depends(oauth2_schema)):
     schedule = dict(schedule)
     user = verify_authority(club_objid=schedule.get("club_objid"), token=token)
     collection_schedule.insert_one(dict(schedule))
     return "success"
+
+# 받아온 schedule 데이터로 전부 대체
+@router.put('/api/user/schedule')
+def update_user_schedule(schedule: Schedule, token: str = Depends(oauth2_schema)):
+    schedule = dict(schedule)
+    user = verify_authority(schedule.get("club_objid"), token)
+    collection_schedule.update_one({"_id": ObjectId(schedule.get("_id"))}, schedule)
 
 @router.delete('/api/user/schedule/{objid}')
 def delete_user_schedule(schedule_objid: str, token: str = Depends((oauth2_schema))):

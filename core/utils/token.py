@@ -43,7 +43,7 @@ def verify_token(token: str = Depends(oauth2_schema)):
 	except JWTError:
 		raise HTTPException(status_code=401, detail="유효하지 않은 토큰이다.2")
 
-# 스케줄을 작성/수정하기 위한 권한 확인
+# 스케줄을 작성/수정하기 위한 권한 확인, 내가 속해있는 동아리가 맞는 지 확인
 def verify_authority(club_objid: str, token: str = Depends(oauth2_schema)):
 	user = verify_token(token)
 	# 현재 속해 있는 클럽(동아리)와 data(post, schedule)추가/수정 대상의 동아리 비교
