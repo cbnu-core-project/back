@@ -5,7 +5,6 @@ from config.database import collection_user
 from schemas.users_schema import users_serializer
 from models.users_model import User
 from pydantic import BaseModel
-from jose import jwt
 
 # utils
 from utils.password import hash_password, verify_password
@@ -30,7 +29,7 @@ def user_register(user: User):
 
 
 @router.post("/api/login")
-def login_for_acess_token(form_data: OAuth2PasswordRequestForm = Depends()):
+def login_for_token(form_data: OAuth2PasswordRequestForm = Depends()):
 	# 데이터베이스에서 유저데이터 가져오기
 	user = users_serializer(collection_user.find({"username": form_data.username}))
 	# 데이터베이스에 데이터가 있다면, user 데이터에 user 1개 저장
