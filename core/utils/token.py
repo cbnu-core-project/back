@@ -12,7 +12,7 @@ import os
 load_dotenv(".env")
 
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 12
 REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 ALGORITHM = "HS256"
 """
@@ -44,6 +44,7 @@ def create_refresh_token(user):
 	refresh_token = jwt.encode(data, REFRESH_SECRET_KEY, algorithm=ALGORITHM)
 	return refresh_token
 
+# refresh token 검증 db와 검증 및 access_token 재발급
 def verify_refresh_token_and_create_access_token(refresh_token):
 	try:
 		payload = jwt.decode(refresh_token, REFRESH_SECRET_KEY, algorithms=[ALGORITHM])
