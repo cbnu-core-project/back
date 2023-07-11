@@ -1,14 +1,14 @@
 from bson import ObjectId
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Cookie
 from config.database import collection_user
 from schemas.users_schema import users_serializer
 from models.users_model import User
 from pydantic import BaseModel
 
 # utils
-from utils.pwd_context import pwd_context
-from utils.token import create_token, verify_token, oauth2_schema
+from utils.password import hash_password, verify_password
+from utils.token import create_access_token, verify_token, oauth2_schema, create_refresh_token, verify_refresh_token_and_create_access_token
 
 router = APIRouter(
 	tags=["users"]
@@ -22,34 +22,37 @@ def user_register(user: User):
 		raise HTTPException(status_code=409,
 							detail="이미 존재하는 사용자입니다.")
 	collection_user.insert_one({"username": user.username,
-								"password": pwd_context.hash(user.password),
+								"password": hash_password(user.password),
 								"realname": user.realname,
 								"clubs": user.clubs})
 	return "회원가입 성공!"
 
 
 @router.post("/api/login")
-def login_for_acess_token(form_data: OAuth2PasswordRequestForm = Depends()):
+def login_for_token(form_data: OAuth2PasswordRequestForm = Depends()):
 	# 데이터베이스에서 유저데이터 가져오기
 	user = users_serializer(collection_user.find({"username": form_data.username}))
 	# 데이터베이스에 데이터가 있다면, user 데이터에 user 1개 저장
 	if user:
 		user = user[0]
-	if not user or not pwd_context.verify(form_data.password, user["password"]):
+	if not user or not verify_password(form_data.password, user["password"]):
 		raise HTTPException(
 			status_code=401,
 			detail="잘못 된 username, password",
 			headers={"WWW-Authenticate": "Bearer"},
 		)
 
-	# access_token 만들기
-	access_token = create_token(user)
+	# token 만들기
+	access_token = create_access_token(user)
+	refresh_token = create_refresh_token(user)
+
+	collection_user.update_one({"_id": user.get("_id")}, { "$set": { "refresh_token": refresh_token}})
 
 	return {
         "access_token": access_token,
+		"refresh_token": refresh_token,
         "token_type": "bearer",
         "username": user["username"],
-		"clubs": user["clubs"]
     }
 
 
@@ -99,4 +102,16 @@ def push_user_club(objid: str, token: str = Depends(oauth2_schema)):
 	collection_user.update_one({"_id": ObjectId(user["_id"])}, {"$push": {"clubs": objid}})
 
 	return "push"
+
+class RefreshToken(BaseModel):
+	refresh_token: str
+
+@router.post("/api/refresh")
+def refresh(token: RefreshToken):
+	refresh_token = dict(token).get("refresh_token")
+	payload = verify_refresh_token_and_create_access_token(refresh_token)
+
+	new_access_token = payload.get("access_token")
+	return new_access_token
+
 

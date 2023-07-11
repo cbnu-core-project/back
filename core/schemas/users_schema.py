@@ -5,6 +5,7 @@ def user_serializer(user) -> dict:
         "password": user["password"],
         "realname": user["realname"],
         "clubs": user["clubs"],
+        "refresh_token": user["refresh_token"],
     }
 
 def users_serializer(users) -> list:

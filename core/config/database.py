@@ -1,10 +1,11 @@
-import pydantic
 import pymongo
 from bson import ObjectId
 import certifi
+from pydantic.json import ENCODERS_BY_TYPE
 
 ################################################################
-pydantic.json.ENCODERS_BY_TYPE[ObjectId] = str
+ENCODERS_BY_TYPE[ObjectId] = str
+
 
 # mongodb 보안에러 해결을 위한 패키지
 ca = certifi.where()

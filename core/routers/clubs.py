@@ -2,7 +2,7 @@ from bson import ObjectId
 from fastapi import APIRouter
 from config.database import collection_club
 from models.clubs_model import Club
-from schemas.clubs_schema import club_serializer, clubs_serializer
+from schemas.clubs_schema import clubs_serializer
 
 
 router = APIRouter(
