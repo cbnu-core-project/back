@@ -66,6 +66,12 @@ def get_user(username: str):
 	user = users_serializer(collection_user.find({"username": username}))[0]
 	return user
 
+@router.get("/api/user/info", description="로그인 된 사용자의 정보 가져오기")
+def get_user(token: str = Depends(oauth2_schema)):
+	user = verify_token(token)
+	return { "_id": user["_id"],"username": user["username"], "realname": user["realname"], "clubs": user["clubs"]}
+
+
 # 현재 유저가 속한 동아리 리스트 가져오기
 @router.get("/api/user/clubs")
 def get_user_clubs(token: str = Depends(oauth2_schema)):
@@ -76,6 +82,7 @@ def get_user_clubs(token: str = Depends(oauth2_schema)):
 
 class UserClubs(BaseModel):
 	clubs: list[str]
+
 
 # 유저 동아리 리스트 수정하기 ( 받아온 리스트로 대체 )
 @router.put("/api/user/clubs", description="유저 동아리 리스트 수정하기 (보낸 리스트로 전부 대체)")
