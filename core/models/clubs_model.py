@@ -6,7 +6,7 @@ class Club(BaseModel):
 	content: str
 	author: str
 	user_id: str
-	image_url: str
+	image_urls: list[str]
 	tag1: str
 	tag2: str
 	tag3: str

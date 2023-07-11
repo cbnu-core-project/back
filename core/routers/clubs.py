@@ -2,7 +2,7 @@ from bson import ObjectId
 from fastapi import APIRouter
 from config.database import collection_club
 from models.clubs_model import Club
-from schemas.clubs_schema import club_serializer, clubs_serializer
+from schemas.clubs_schema import clubs_serializer
 
 
 router = APIRouter(
@@ -106,3 +106,8 @@ async def update_club(objid: str, club: Club):
 async def delete_club(objid: str):
 	collection_club.delete_one({"_id": ObjectId(objid)})
 	return []
+
+@router.post("/api/club/image/push", description="쿼리파라미터로, 수정할 club의 objid랑, 추가할 image_url 주기")
+def push_image_url(club_objid: str, image_url: str):
+	collection_club.update_one({"_id": ObjectId(club_objid)}, { "$push" : { "image_urls": image_url}})
+	return "push success"
