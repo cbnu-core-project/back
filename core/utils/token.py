@@ -6,10 +6,10 @@ from schemas.users_schema import users_serializer
 from jose import jwt, JWTError
 
 # .env
-from dotenv import load_dotenv
-import os
+# from dotenv import load_dotenv
+# import os
 
-load_dotenv(".env")
+# load_dotenv(".env")
 
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 12
@@ -85,14 +85,14 @@ def verify_token(token: str = Depends(oauth2_schema)):
 		raise HTTPException(status_code=401, detail="유저를 찾을 수 없습니다.")
 
 # 스케줄을 작성/수정하기 위한 권한 확인, 내가 속해있는 동아리가 맞는 지 확인
-def verify_authority(club_objid: str, token: str = Depends(oauth2_schema)):
+def verify_schedule_authority(club_objid: str, token: str = Depends(oauth2_schema)):
 	user = verify_token(token)
 	# 현재 속해 있는 클럽(동아리)와 data(post, schedule)추가/수정 대상의 동아리 비교
 	if club_objid in user.get("clubs"):
-		return user
+		if user.get("authority") <= 2:
+			return user
 
 	raise HTTPException(status_code=401, detail="속해있는 동아리가 아니다.")
-
 
 
 

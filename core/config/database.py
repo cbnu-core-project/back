@@ -22,4 +22,7 @@ collection_promotion = db['promotion']
 collection_notice = db['notice']
 collection_user = db['user']
 collection_schedule = db['schedule']
+collection_club_active_record = db['club_active_record']
+collection_club_application_list = db['club_application_list']
+collection_club_faq = db['club_faq']
 ################################################################

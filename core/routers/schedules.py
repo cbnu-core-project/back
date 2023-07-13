@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from schemas.schedules_schema import schedules_serializer
 from config.database import collection_schedule
 from models.schedules_model import Schedule
-from utils.token import oauth2_schema, verify_token, verify_authority
+from utils.token import oauth2_schema, verify_token, verify_schedule_authority
 
 router = APIRouter(
     tags=["schedules"]
@@ -26,7 +26,7 @@ def get_user_schedule(token: str = Depends(oauth2_schema)):
 @router.post('/api/user/schedule')
 def create_user_schedule(schedule: Schedule, token: str = Depends(oauth2_schema)):
     schedule = dict(schedule)
-    user = verify_authority(club_objid=schedule.get("club_objid"), token=token)
+    user = verify_schedule_authority(club_objid=schedule.get("club_objid"), token=token)
     collection_schedule.insert_one(dict(schedule))
     return "success"
 
@@ -34,7 +34,7 @@ def create_user_schedule(schedule: Schedule, token: str = Depends(oauth2_schema)
 @router.put('/api/user/schedule')
 def update_user_schedule(schedule: Schedule, token: str = Depends(oauth2_schema)):
     schedule = dict(schedule)
-    user = verify_authority(schedule.get("club_objid"), token)
+    user = verify_schedule_authority(schedule.get("club_objid"), token)
     collection_schedule.update_one({"_id": ObjectId(schedule.get("_id"))}, schedule)
 
 @router.delete('/api/user/schedule/{objid}')
@@ -46,7 +46,7 @@ def delete_user_schedule(schedule_objid: str, token: str = Depends((oauth2_schem
         raise HTTPException(status_code=401, detail="유효하지 않은 objid")
 
     # 권한 및 토큰 검증
-    user = verify_authority(club_objid=club_objid, token=token)
+    user = verify_schedule_authority(club_objid=club_objid, token=token)
     collection_schedule.delete_one({"_id": ObjectId(schedule_objid)})
     return "delete success"
 

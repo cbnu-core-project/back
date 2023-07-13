@@ -24,7 +24,8 @@ def user_register(user: User):
 	collection_user.insert_one({"username": user.username,
 								"password": hash_password(user.password),
 								"realname": user.realname,
-								"clubs": user.clubs})
+								"clubs": user.clubs,
+								"authority": user.authority})
 	return "회원가입 성공!"
 
 
