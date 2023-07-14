@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 # 라우터
-from routers import clubs, notices, promotions, users, images, schedules
+from routers import clubs, notices, promotions, users, images, schedules, club_active_records
 
 
 
@@ -35,7 +35,7 @@ app.include_router(promotions.router)
 app.include_router(users.router)
 app.include_router(images.router)
 app.include_router(schedules.router)
-
+app.include_router(club_active_records.router)
 
 
 

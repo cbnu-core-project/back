@@ -15,7 +15,6 @@ router = APIRouter(
 )
 
 
-
 @router.post("/api/register")
 def user_register(user: User):
 	if(users_serializer(collection_user.find({"username": user.username}))):
@@ -25,6 +24,7 @@ def user_register(user: User):
 								"password": hash_password(user.password),
 								"realname": user.realname,
 								"clubs": user.clubs,
+								"refresh_token": user.refresh_token,
 								"authority": user.authority})
 	return "회원가입 성공!"
 
