@@ -37,5 +37,5 @@ def update_club_active_records(objid: str, club_active_record: ClubActiveRecord)
 @router.delete("/api/club_active_records/{objid}")
 def delete_club_active_records(objid: str):
     collection_club_active_record.delete_one({"_id": objid})
-    return []
+    return "삭제 성공"
 
