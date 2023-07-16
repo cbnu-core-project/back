@@ -1,6 +1,5 @@
 from bson import ObjectId
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import APIRouter, Depends, HTTPException, Cookie
+from fastapi import APIRouter, Depends, HTTPException
 from config.database import collection_user
 from schemas.users_schema import users_serializer
 from models.users_model import User
@@ -8,9 +7,12 @@ from pydantic import BaseModel
 
 from utils.token import oauth2_schema
 
+
 router = APIRouter(
 	tags=["users"]
 )
+
+
 
 @router.get("/api/user/info/{email}", description="email(id) 에 맞는 유저의 정보 리턴")
 def get_user(email: str):

@@ -4,8 +4,10 @@ from pydantic import BaseModel
 from config.database import collection_user
 from enum import Enum
 import json
-from models.users_model import User, SocialEnum
+from models.users_model import User
+from enums.enums import SocialEnum
 from schemas.others_schema import others_serializer
+from utils.kakao_token import verify_and_get_token
 
 REST_API_KEY = "40d478c8d7447b20143b402959fd7ed8";
 REDIRECT_URI = "http://localhost:3000";
@@ -43,7 +45,8 @@ def user_register(user):
 		return False
 
 	# 가입되지 않은 이메일이면
-	collection_user.insert_one({"email": user.get('kakao_account').get('email'),
+	collection_user.insert_one({"unique_id": f"{SocialEnum.kakao}_{user.get('id')}",
+								"email": user.get('kakao_account').get('email'),
 								"realname": "",
 								"nickname": user.get('kakao_account').get('profile').get('nickname'),
 								"profile_image_url": user.get('kakao_account').get('profile').get('profile_image_url'),
@@ -57,7 +60,7 @@ def user_register(user):
 								})
 	return True
 
-@router.post("/oauth/kakao/callback")
+@router.post("/oauth/kakao/login")
 def kakao_oauth(code: Code):
 	code = dict(code).get('code')
 	headers = { "Content-type": "application/x-www-form-urlencoded;charset=utf-8" }
@@ -84,3 +87,10 @@ def kakao_oauth(code: Code):
 	return { "access_token": access_token, "refresh_token": refresh_token }
 
 
+@router.get(
+    "/oauth/kakao/protected",
+    response_model=str,
+)
+async def protected(token: str = Depends(verify_and_get_token)):
+	print(get_user_info(token))
+	return f"Hello, user! Your token is {token}."

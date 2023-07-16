@@ -7,7 +7,3 @@ schedule 부분만 예외적으로 loads(dumps()) 사용
 def schedules_serializer(schedules) -> list:
 	datas = loads(dumps(schedules))
 	return datas
-
-def others_serializer(schedules) -> list:
-	datas = loads(dumps(schedules))
-	return datas
