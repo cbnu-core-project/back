@@ -23,5 +23,5 @@ collection_notice = db['notice']
 collection_user = db['user']
 collection_schedule = db['schedule']
 collection_club_activity_history = db['club_activity_history']
-collection_club_programs = db['club_programs.py']
+collection_club_programs = db['club_program']
 ################################################################
