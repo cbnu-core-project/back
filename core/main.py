@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 # 라우터
-from routers import clubs, notices, promotions, images, schedules, club_active_records, club_activity_history, club_prgroams
+from routers import clubs, notices, promotions, images, schedules, club_active_records, club_activity_history, club_programs
 from routers.oauth import kakao_oauth
 
 
