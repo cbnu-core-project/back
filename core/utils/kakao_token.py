@@ -6,14 +6,6 @@ from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
 from starlette import status
 
-
-# def verify_kakao_access_token(access_token: str = Header(default="Bearer ")) -> bool:
-# 	headers = {'Authorization': 'Bearer ' + access_token}
-# 	response = requests.get('https://kapi.kakao.com/v1/user/access_token_info', headers=headers).json()
-# 	if response.ok:
-# 		return True
-# 	return False
-
 # We will handle a missing token ourselves
 get_bearer_token = HTTPBearer(auto_error=False)
 

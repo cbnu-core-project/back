@@ -2,7 +2,7 @@ from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException
 from config.database import collection_user
 from pydantic import BaseModel
-from utils.common_token import verify_common_token_and_get_unique_id
+from utils.common_token import verify_common_token_and_get_unique_id, verify_common_refresh_token_and_create_access_token
 from schemas.others_schema import others_serializer
 
 
@@ -50,13 +50,13 @@ def push_user_club(club_objid: str, unique_id: str = Depends(verify_common_token
 class RefreshToken(BaseModel):
 	refresh_token: str
 
-# @router.post("/api/refresh")
-# def refresh(token: RefreshToken):
-# 	refresh_token = dict(token).get("refresh_token")
-# 	payload = verify_refresh_token_and_create_access_token(refresh_token)
-#
-# 	new_access_token = payload.get("access_token")
-# 	return new_access_token
+@router.post("/api/refresh")
+def refresh(token: RefreshToken):
+	refresh_token = dict(token).get("refresh_token")
+	new_access_token = verify_common_refresh_token_and_create_access_token(refresh_token)
+	print(new_access_token)
+
+	return {"access_token" : new_access_token}
 
 @router.get("/api/common/protected")
 def common_protected(unique_id: str = Depends(verify_common_token_and_get_unique_id)):
