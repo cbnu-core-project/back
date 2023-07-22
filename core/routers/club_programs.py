@@ -34,4 +34,5 @@ def delete_club_programs(objid: str):
 def put_club_programs(objid: str, club_programs: ClubPrograms):
     collection_club_programs.update_one({"_id":ObjectId(objid)},{"$set":dict(club_programs)})
     club_programs = club_programs_serializer(collection_club_programs.find({"_id": ObjectId(objid)}))
+
     return club_programs
