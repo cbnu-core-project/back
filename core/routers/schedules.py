@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from schemas.schedules_schema import schedules_serializer
 from config.database import collection_schedule
 from models.schedules_model import Schedule
-from utils.token import oauth2_schema, verify_token, verify_schedule_authority
+from utils.deprecated.token import oauth2_schema, verify_token, verify_schedule_authority
 
 router = APIRouter(
     tags=["schedules"]

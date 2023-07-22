@@ -6,27 +6,22 @@ from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
 from starlette import status
 
-
-# def verify_kakao_access_token(access_token: str = Header(default="Bearer ")) -> bool:
-# 	headers = {'Authorization': 'Bearer ' + access_token}
-# 	response = requests.get('https://kapi.kakao.com/v1/user/access_token_info', headers=headers).json()
-# 	if response.ok:
-# 		return True
-# 	return False
-
 # We will handle a missing token ourselves
 get_bearer_token = HTTPBearer(auto_error=False)
+
+NAVER_USERINFO_URL = "https://openapi.naver.com/v1/nid/me"
+
 
 class UnauthorizedMessage(BaseModel):
 	detail: str = "유효하지 않는 토큰이다."
 
-async def verify_and_get_kakao_token(
+async def verify_and_get_naver_token(
     auth: t.Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 ) -> str:
 	print(auth)
 	token = auth.credentials
 	headers = {'Authorization': 'Bearer ' + token }
-	response = requests.get('https://kapi.kakao.com/v1/user/access_token_info', headers=headers)
+	response = requests.get(NAVER_USERINFO_URL, headers=headers)
 	if auth is None or not(response.ok):
 		raise HTTPException(
 			status_code=status.HTTP_401_UNAUTHORIZED,

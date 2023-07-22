@@ -7,7 +7,7 @@ import json
 from models.users_model import User
 from enums.enums import SocialEnum
 from schemas.others_schema import others_serializer
-from utils.kakao_token import verify_and_get_token
+from utils.kakao_token import verify_and_get_kakao_token
 
 REST_API_KEY = "40d478c8d7447b20143b402959fd7ed8";
 REDIRECT_URI = "http://localhost:3000";
@@ -23,7 +23,7 @@ router = APIRouter(
 class Code(BaseModel):
 	code: str
 
-def get_user_info(access_token):
+def get_kakao_user_info(access_token):
 	headers = {"Authorization": f"Bearer {access_token}"}
 	response = requests.get(KAKAO_USERINFO_URL, headers=headers,
 							# params={"property_keys": json.dumps(["kakao_account.email"])}
@@ -38,19 +38,22 @@ def get_user_info(access_token):
 
 	return response.json()
 
-def user_register(user):
+def kakao_user_register(user):
+
+	social = SocialEnum.kakao.value
+	id = user.get('id')
+
 	# 이미 가입된 이메일이면
-	email = user.get('kakao_account').get('email')
-	if(others_serializer(collection_user.find({"email": email}))):
+	if(others_serializer(collection_user.find({"unique_id": f"{social}_{id}"}))):
 		return False
 
 	# 가입되지 않은 이메일이면
-	collection_user.insert_one({"unique_id": f"{SocialEnum.kakao}_{user.get('id')}",
+	collection_user.insert_one({"unique_id": f"{social}_{id}",
 								"email": user.get('kakao_account').get('email'),
 								"realname": "",
 								"nickname": user.get('kakao_account').get('profile').get('nickname'),
 								"profile_image_url": user.get('kakao_account').get('profile').get('profile_image_url'),
-								"social": SocialEnum.kakao,
+								"social": social,
 								"clubs": [],
 								"refresh_token": "",
 								"authority": 4,
@@ -68,8 +71,9 @@ def kakao_oauth(code: Code):
 
 	access_token = response.get('access_token')
 	refresh_token = response.get('refresh_token')
-	user_info = get_user_info(access_token)
+	user_info = get_kakao_user_info(access_token)
 
+	# 이메일 유효성 검증
 	email = user_info.get('kakao_account').get('email')
 	is_email_valid = user_info.get('kakao_account').get('is_email_valid')
 	is_email_verified = user_info.get('kakao_account').get('is_email_verified')
@@ -81,7 +85,8 @@ def kakao_oauth(code: Code):
 			headers={"WWW-Authenticate": "Bearer"},
 		)
 
-	if (user_register(user_info)):
+	# 유저정보를 통한 회원가입
+	if (kakao_user_register(user_info)):
 		print("회원가입 완료")
 
 	return { "access_token": access_token, "refresh_token": refresh_token }
@@ -91,6 +96,6 @@ def kakao_oauth(code: Code):
     "/oauth/kakao/protected",
     response_model=str,
 )
-async def protected(token: str = Depends(verify_and_get_token)):
-	print(get_user_info(token))
+async def protected(token: str = Depends(verify_and_get_kakao_token)):
+	print(get_kakao_user_info(token))
 	return f"Hello, user! Your token is {token}."

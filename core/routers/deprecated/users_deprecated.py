@@ -1,6 +1,6 @@
 from bson import ObjectId
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import APIRouter, Depends, HTTPException, Cookie
+from fastapi import APIRouter, Depends, HTTPException
 from config.database import collection_user
 from schemas.users_schema import users_serializer
 from models.users_model import User
@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 # utils
 from utils.password import hash_password, verify_password
-from utils.token import create_access_token, verify_token, oauth2_schema, create_refresh_token, verify_refresh_token_and_create_access_token
+from utils.deprecated.token import create_access_token, verify_token, oauth2_schema, create_refresh_token, verify_refresh_token_and_create_access_token
 
 router = APIRouter(
 	tags=["users"]
