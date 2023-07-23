@@ -3,7 +3,8 @@ from datetime import datetime
 
 class Club(BaseModel):
 	title: str
-	content: str
+	main_content: str
+	sub_content: str
 	user_objid: str
 	image_url: list[str]
 	activity_tags: list[str]
