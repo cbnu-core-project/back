@@ -19,8 +19,11 @@ def notice_conversion():
         # collection_notice.update_one({"_id": notice.get("_id")}, { "$set": {"last_updated": ''}})
         collection_notice.update_one({"_id": notice.get("_id")}, { "$currentDate": {"last_updated": True}})
 
+def club_migrate():
+    collection_club.update_many({}, {"$set": { "last_updated": ""}})
+    collection_club.update_many({}, {"$currentDate": { "last_updated": True}})
 
 
 
 if __name__ == "__main__":
-    pass
+    club_migrate()
