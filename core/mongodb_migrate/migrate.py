@@ -27,4 +27,4 @@ def club_migrate():
 
 
 if __name__ == "__main__":
-    club_migrate()
+    pass

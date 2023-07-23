@@ -28,4 +28,5 @@ collection_club_faq = db['club_faq']
 collection_club_activity_history = db['club_activity_history']
 collection_club_programs = db['club_program']
 collection_club_faq = db['club_faq']
+collection_club_application_form = db['club_application_form']
 ################################################################
