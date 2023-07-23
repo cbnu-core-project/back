@@ -5,3 +5,5 @@ class ClubActivityHistory(BaseModel):
     year: str
     month: str
     club_objid: str
+    
+ 
