@@ -12,3 +12,5 @@ def promotion_serializer(promotion) -> dict:
 
 def promotions_serializer(promotions) -> list:
 	return [promotion_serializer(promotion) for promotion in promotions]
+
+
