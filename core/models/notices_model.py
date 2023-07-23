@@ -1,10 +1,10 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class Notice(BaseModel):
 	title: str
 	content: str
-	author: str
-	user_id: str
-	club_name: str
-	classification: int
+	user_objid: str
+	nickname: str
+	last_updated: datetime | None = None

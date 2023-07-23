@@ -4,10 +4,6 @@ from models.club_programs_model import ClubPrograms
 from schemas.club_programs_schema import club_programs_serializer
 from bson.json_util import loads, dumps
 from bson import ObjectId
-import string
-import random
-import shutil
-import time
 
 router = APIRouter(
     tags=["Club_Programs"]
@@ -38,4 +34,5 @@ def delete_club_programs(objid: str):
 def put_club_programs(objid: str, club_programs: ClubPrograms):
     collection_club_programs.update_one({"_id":ObjectId(objid)},{"$set":dict(club_programs)})
     club_programs = club_programs_serializer(collection_club_programs.find({"_id": ObjectId(objid)}))
+
     return club_programs
