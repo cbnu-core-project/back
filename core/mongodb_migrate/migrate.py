@@ -20,8 +20,9 @@ def notice_conversion():
         collection_notice.update_one({"_id": notice.get("_id")}, { "$currentDate": {"last_updated": True}})
 
 def club_migrate():
-    collection_club.update_many({}, {"$set": { "last_updated": ""}})
-    collection_club.update_many({}, {"$currentDate": { "last_updated": True}})
+    collection_club.update_many({}, {"$set": { "main_content": ""}})
+    collection_club.update_many({}, {"$rename": { "content": "sub_content"}})
+    # collection_club.update_many({}, {"$currentDate": { "last_updated": True}})
 
 
 
